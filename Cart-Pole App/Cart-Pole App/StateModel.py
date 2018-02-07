@@ -31,6 +31,8 @@ def cart_pole_model(dt,x,flag,u):
     #    Str. Saturn 24, 400504 Cluj-Napoca, Romania
     #    florian@coneural.org
     #    July 11, 2005; updated February 10, 2007
+    #
+    #    https://coneural.org/florian/papers/05_cart_pole.pdf
     
     Nc = (mc + mp)*g - mp*l*(ang_acc*np.sin(angle) + (ang_vel**2)*np.cos(angle))
     
