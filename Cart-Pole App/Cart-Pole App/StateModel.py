@@ -11,7 +11,7 @@ def cart_pole_model(dt,x,flag,u):
     mc              = 1.0
     mp              = 0.1
     uc              = 0.0005
-    up              = 0.02
+    up              = 0.00002
     
     # Inputs:
     F               = u

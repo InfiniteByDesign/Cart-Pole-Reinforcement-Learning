@@ -110,7 +110,7 @@ with graph.as_default():
             fail = False
             
             # Loop through the iterations until fail or pass
-            while fail==False and i < 600000:
+            while fail==False and i < 1000:
                 # Action
                 act = sess.run([action], feed_dict={x_a: simple_state, keep_prob: cfg.dropout_output_keep_prob})
                 u = 0
