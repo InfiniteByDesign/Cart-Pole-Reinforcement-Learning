@@ -103,7 +103,7 @@ with graph.as_default():
             t = 0
             dt = 0.02
             jlast = np.array([0]).reshape(1,1)
-            state = np.array([uniform(-12,12),0,0,0,0]).reshape(1,5) #[angle, ang_vel, dist, vel, ang_acc]
+            state = np.array([uniform(-np.deg2rad(12),np.deg2rad(12)),0,0,0,0]).reshape(1,5) #[angle, ang_vel, dist, vel, ang_acc]
             simple_state = np.array([state[0,0],state[0,1],state[0,2],state[0,3]]).reshape(1,4)
             
             i = 0
