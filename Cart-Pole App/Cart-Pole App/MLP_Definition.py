@@ -39,10 +39,12 @@ def create_weights_biases(numInputs, hidden_layer_widths, numOutputs, mean, std_
             if i < len(hidden_layer_widths):
                 # Hidden layers
                 key = 'b' + str(i+1)
-                biases[key]  = tf.Variable(tf.random_normal([hidden_layer_widths[i]],mean,std_dev))
+                biases[key]  = tf.Variable(0.0)
+                #biases[key]  = tf.Variable(tf.random_normal([hidden_layer_widths[i]],mean,std_dev))
             # Add the output layer
             else:
                 key = 'out'
+                biases['out'] = tf.Variable(0.0)
                 biases['out'] = tf.Variable(tf.random_normal([numOutputs],mean,std_dev))
             # Add the variable to TensorBoard
             with tf.name_scope(key):
