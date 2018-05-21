@@ -6,7 +6,7 @@ Date:           18 January 2018
 Description:    Create a MLP NN, train using the supplied dataset then test and display the test results on a chart
 """
 # Include files
-import gym
+#import gym
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -108,13 +108,13 @@ print("Defining Variables")
 # Initialize variables
 alpha       = 0.9
 
-print("Defining Model")
+#print("Defining Model")
     
 # Setup the NN Model
-action_w1 = np.ones((4,24),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(4,24))
-action_w2 = np.ones((24,1),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(24,1))
-critic_w1 = np.ones((6,24),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(6,24))
-critic_w2 = np.ones((24,1),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(24,1))
+#action_w1 = np.ones((4,24),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(4,24))
+#action_w2 = np.ones((24,1),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(24,1))
+#critic_w1 = np.ones((6,24),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(6,24))
+#critic_w2 = np.ones((24,1),dtype=float) * np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(24,1))
     
 print("Training Model")
 
@@ -130,136 +130,155 @@ best_cw1_hist   = []
 best_cw2_hist   = []
 Done = False
 max_i = 0
-for epoch in range(cfg.epochs):
+best_i = 0
+
+for iter in range(1000000):
     if Done == True:
-        break
+            break
+    max_i = 0
+
+    # Setup the NN Model
+    action_w1 = np.ones((4,24),dtype=float) * np.abs(np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(4,24)))
+    action_w2 = np.ones((24,1),dtype=float) * np.abs(np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(24,1)))
+    critic_w1 = np.ones((6,24),dtype=float) * np.abs(np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(6,24)))
+    critic_w2 = np.ones((24,1),dtype=float) * np.abs(np.random.normal(cfg.init_weights_bias_mean_val,cfg.init_weights_bias_std_dev,(24,1)))
+
+    for epoch in range(cfg.epochs):
+        if Done == True:
+            break
     
-    # Initial Values
-    i = 0
-    fail = False
-    t = 0
-    dt = 0.02
-    Jlast = np.array([0]).reshape(1,1)
+        # Initial Values
+        i = 0
+        fail = False
+        t = 0
+        dt = 0.02
+        Jlast = np.array([0]).reshape(1,1)
                    
-    # Initial state of the physics model
-    #state = np.array([uniform(-np.deg2rad(5),np.deg2rad(5)),0,0,0,0]).reshape(1,5) #[angle, ang_vel, dist, vel, ang_acc]
-    state = np.array([0,0,0,0,0]).reshape(1,5) # angle,ang_vel,ang_acc,x,x_vel
+        # Initial state of the physics model
+        #state = np.array([uniform(-np.deg2rad(5),np.deg2rad(5)),0,0,0,0]).reshape(1,5) #[angle, ang_vel, dist, vel, ang_acc]
+        state = np.array([0,0,0,0,0]).reshape(1,5) # angle,ang_vel,ang_acc,x,x_vel
     
 
-    # Random initial force
-    if np.random.uniform(0,1) < 0.5:
-        u = 10
-    else:
-        u = -10
+        # Random initial force
+        if np.random.uniform(0,1) < 0.5:
+            u = 10
+        else:
+            u = -10
         
-    # Calculate the change in state then the new state matrix
-    state   = np.array(sm.cart_pole_model(dt,state[0,0],state[0,1],state[0,2],state[0,3],state[0,4],u)).reshape(1,5)
-    X       = np.array([np.deg2rad(state[0,0]),state[0,1],state[0,3],state[0,4]]).reshape(1,4)
-        
-    # Placeholders
-    angle_hist  = []
-    vel_hist    = []
-    j_hist      = []
-    u_hist      = []
-    x_hist      = []
-    aw1_hist    = []
-    aw2_hist    = []
-    cw1_hist    = []
-    cw2_hist    = []
-    
-    # Loop through the iterations until fail or pass
-    while fail==False and i < 600000:
-                    
-        # Action
-        u, g = action_output(action_w1,action_w2,X)
-        if u >= 0:
-            u = 10         # force
-        elif u < 0:
-            u = -10        # force
-                    
         # Calculate the change in state then the new state matrix
-        # state = [ang, ang vel, dist, vel]
-        #state   = np.array(sm.cart_pole_model(dt,state[0,0],state[0,1],state[0,2],state[0,3],state[0,4],u)).reshape(1,5)
-        state   = np.array(sm.cart_pole_model(dt,state[0,0],state[0,1],state[0,2],state[0,3],0,u)).reshape(1,5)
+        state   = np.array(sm.cart_pole_model(dt,state[0,0],state[0,1],state[0,2],state[0,3],state[0,4],u)).reshape(1,5)
         X       = np.array([np.deg2rad(state[0,0]),state[0,1],state[0,3],state[0,4]]).reshape(1,4)
         
-        # Determine the success feedback, r
-        # state = [ang, ang vel, dist, vel, ang_acc]
-        #angle = np.rad2deg(X[0,0])%360
-        angle = X[0,0]%360
-        if angle > 180:
-            angle = angle - 360
-        if angle <= 12 and angle >= -12 and X[0,2]>-2.4 and X[0,2]<2.4:
-            r = 0
-            update_range = 1
-        else:
-            r = -1
-            update_range = 100
+        # Placeholders
+        angle_hist  = []
+        vel_hist    = []
+        j_hist      = []
+        u_hist      = []
+        x_hist      = []
+        aw1_hist    = []
+        aw2_hist    = []
+        cw1_hist    = []
+        cw2_hist    = []
+    
+        # Loop through the iterations until fail or pass
+        while fail==False and i < 600000:
+                    
+            # Action
+            u, g = action_output(action_w1,action_w2,X)
+            if u >= 0:
+                u = 10         # force
+            elif u < 0:
+                u = -10        # force
+                    
+            # Calculate the change in state then the new state matrix
+            # state = [ang, ang vel, dist, vel]
+            #state   = np.array(sm.cart_pole_model(dt,state[0,0],state[0,1],state[0,2],state[0,3],state[0,4],u)).reshape(1,5)
+            state   = np.array(sm.cart_pole_model(dt,state[0,0],state[0,1],state[0,2],state[0,3],0,u)).reshape(1,5)
+            X       = np.array([np.deg2rad(state[0,0]),state[0,1],state[0,3],state[0,4]]).reshape(1,4)
         
-        # Critic, create the critic input and evaluate the network
-        critic_input    = np.concatenate((X,np.array([u,r],dtype=float).reshape((1,2))),axis=1)
-        J, _p           = critic_output(critic_w1,critic_w2,critic_input)
+            # Determine the success feedback, r
+            # state = [ang, ang vel, dist, vel, ang_acc]
+            #angle = np.rad2deg(X[0,0])%360
+            angle = X[0,0]%360
+            if angle > 180:
+                angle = angle - 360
+            if angle <= 12 and angle >= -12 and X[0,2]>-2.4 and X[0,2]<2.4:
+                r = 0
+                update_range = 1
+            else:
+                r = -1
+                update_range = 100
         
-        # Calculate the action and critic error
-        Ea = -action_cost(J)
-        Ec = critic_cost(alpha, J, Jlast, r)
+            # Critic, create the critic input and evaluate the network
+            critic_input    = np.concatenate((X,np.array([u,r],dtype=float).reshape((1,2))),axis=1)
+            J, _p           = critic_output(critic_w1,critic_w2,critic_input)
         
-        # Update the weights
+            # Calculate the action and critic error
+            Ea = action_cost(J)
+            Ec = critic_cost(alpha, J, Jlast, r)
         
-        for update in range(update_range):
-            critic_w1, critic_w2, critic_factor = critic_update(critic_w1, critic_w2, Ec, critic_input, _p, 0.001)
-            action_w1, action_w2 = action_update(action_w1, action_w2, critic_factor, Ea, X, u, g)
+            # Update the weights
+        
+            for update in range(update_range):
+                critic_w1, critic_w2, critic_factor = critic_update(critic_w1, critic_w2, Ec, critic_input, _p, 0.001)
+                action_w1, action_w2 = action_update(action_w1, action_w2, critic_factor, Ea, X, u, g)
        
-        # Save history
-        angle_hist.append(angle)
-        vel_hist.append(X[0,3])
-        j_hist.append(J[0,0])
-        u_hist.append(u)
-        x_hist.append(X[0,2])
-        aw1_hist.append(np.mean(action_w1))
-        aw2_hist.append(np.mean(action_w2))
-        cw1_hist.append(np.mean(critic_w1))
-        cw2_hist.append(np.mean(critic_w2))
+            # Save history
+            angle_hist.append(angle)
+            vel_hist.append(X[0,3])
+            j_hist.append(J[0,0])
+            u_hist.append(u)
+            x_hist.append(X[0,2])
+            aw1_hist.append(np.mean(action_w1))
+            aw2_hist.append(np.mean(action_w2))
+            cw1_hist.append(np.mean(critic_w1))
+            cw2_hist.append(np.mean(critic_w2))
 
-        # Break the loop if we fail to keep the angle in range
-        if r == -1:
-            fail = True
+            # Break the loop if we fail to keep the angle in range
+            if r == -1:
+                fail = True
             
-            # Print a summary
-            print("Epoch:", '%04d' % (epoch+1), "max was:", '%06d' % (max_i + 1), "steps, this epoch was:", '%06d' % (i + 1))
+                # Print a summary
+                #print("Iter:", '%04d' % (iter+1), "Epoch:", '%04d' % (epoch+1), "max was:", '%06d' % (max_i + 1), "steps, this epoch was:", '%06d' % (i + 1))
 
-            # Save best run only
-            if i > max_i:
-                max_i = i
-                best_angle_hist = angle_hist
-                best_vel_hist   = vel_hist
-                best_j_hist     = j_hist  
-                best_u_hist     = u_hist
-                best_x_hist     = x_hist
-                best_aw1_hist   = aw1_hist
-                best_aw2_hist   = aw2_hist
-                best_cw1_hist   = cw1_hist
-                best_cw2_hist   = cw2_hist
+                # Save best run only
+                if i > max_i:
+                    max_i = i
+                    best_angle_hist = angle_hist
+                    best_vel_hist   = vel_hist
+                    best_j_hist     = j_hist  
+                    best_u_hist     = u_hist
+                    best_x_hist     = x_hist
+                    best_aw1_hist   = aw1_hist
+                    best_aw2_hist   = aw2_hist
+                    best_cw1_hist   = cw1_hist
+                    best_cw2_hist   = cw2_hist
         
-        """
-        if i%100 == 0:
-            plot_results(angle_hist,vel_hist,j_hist,u_hist,x_hist,aw1_hist,aw2_hist,cw1_hist,cw2_hist)
-            temp = 1
-        """
-        
-        # Check if we reached the max time step
-        if i == 600000:
-            Done = True
-            print("Epoch:", '%04d' % (epoch+1), " MAX STEP COUNT REACHED, 600,000!")
+            
+            #if i == cfg.epochs-1:
+            #    plot_results(angle_hist,vel_hist,j_hist,u_hist,x_hist,aw1_hist,aw2_hist,cw1_hist,cw2_hist)
+            #    temp = 1
+            
+            # Check if we reached the max time step
+            if i == 600000:
+                Done = True
+                print("Epoch:", '%04d' % (epoch+1), " MAX STEP COUNT REACHED, 600,000!")
     
-        # Increment the time index and save variables
-        i = i + 1
-        t = t + dt
-        Jlast = J
+            # Increment the time index and save variables
+            i = i + 1
+            t = t + dt
+            Jlast = J
     
-    # Done with one trial, loop back
-    plot_results(angle_hist,vel_hist,j_hist,u_hist,x_hist,aw1_hist,aw2_hist,cw1_hist,cw2_hist)
-    temp = 1
+        # Done with one trial, loop back
+        #plot_results(angle_hist,vel_hist,j_hist,u_hist,x_hist,aw1_hist,aw2_hist,cw1_hist,cw2_hist)
+        temp = 1
+
+        if max_i > best_i:
+            best_i = max_i
+
+        if epoch == cfg.epochs-1:
+            print("Iter:", '%04d' % (iter+1), "best was:", '%06d' % (best_i + 1), "steps, this iteration was:", '%06d' % (max_i + 1))
+
 plot_results(best_angle_hist,best_vel_hist,best_j_hist,best_u_hist,best_x_hist,best_aw1_hist,best_aw2_hist,best_cw1_hist,best_cw2_hist)
 
 
