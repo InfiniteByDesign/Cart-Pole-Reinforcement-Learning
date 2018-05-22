@@ -11,6 +11,7 @@
     <OutputPath>.</OutputPath>
     <Name>Cart-Pole App</Name>
     <RootNamespace>Cart-Pole App</RootNamespace>
+    <InterpreterId>Global|ContinuumAnalytics|Anaconda36-64</InterpreterId>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <DebugSymbols>true</DebugSymbols>
@@ -22,9 +23,20 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="Cart_Pole_App.py" />
+    <Compile Include="Cart_Pole_App_ActorOnly.py" />
+    <Compile Include="Cart_Pole_App_OpenAI.py" />
+    <Compile Include="Cart_Pole_App_TF.py" />
+    <Compile Include="Cart_Pole_App_TF_ActorOnly.py" />
+    <Compile Include="Cart_Pole_App_TF_kvfrans.py" />
+    <Compile Include="Configuration.py" />
+    <Compile Include="functions.py" />
+    <Compile Include="MLP_Definition.py" />
     <Compile Include="StateModel.py">
       <SubType>Code</SubType>
     </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda36-64" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

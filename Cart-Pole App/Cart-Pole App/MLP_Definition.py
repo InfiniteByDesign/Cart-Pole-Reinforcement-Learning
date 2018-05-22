@@ -51,7 +51,6 @@ def create_weights_biases(numInputs, hidden_layer_widths, numOutputs, mean, std_
                 variable_summaries(biases[key])
     return weights,biases
 
-
 #%% Execute a multilayer perceptron network for the given input, weights, biases and dropout keep probability
 def multilayer_perceptron(x, weights, biases, keep_prob):
     with tf.name_scope('layers'):
@@ -68,7 +67,6 @@ def multilayer_perceptron(x, weights, biases, keep_prob):
                 else:
                     layer = tf.add(tf.matmul(layer, weights['out']), biases['out'])
     return layer
-
 
 #%% Train MLP network
 def multilayer_perceptron_train(sess,cfg,saver,summary_writer,x,y,keep_prob,x_batches,y_batches,optimizer,cost,merged_summary_op):    
@@ -92,7 +90,6 @@ def multilayer_perceptron_train(sess,cfg,saver,summary_writer,x,y,keep_prob,x_ba
         summary_writer.add_summary(summary, epoch)
         summary_writer.flush()
 
-    
 #%% Test the MLP network
 def multiplayer_perceptron_test(sess,cfg,summary_writer,x,keep_prob,x_input,y_shape,predictions):
     # Run the predictions for a batch style input (3 dimensions [batch, timestep, sample])
