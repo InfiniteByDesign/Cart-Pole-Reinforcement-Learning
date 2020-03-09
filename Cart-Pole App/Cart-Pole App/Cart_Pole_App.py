@@ -3,10 +3,9 @@
 """
 Author:         David Beam, db4ai
 Date:           18 January 2018
-Description:    Create a MLP NN, train using the supplied dataset then test and display the test results on a chart
+Description:    
 """
 # Include files
-#import gym
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt

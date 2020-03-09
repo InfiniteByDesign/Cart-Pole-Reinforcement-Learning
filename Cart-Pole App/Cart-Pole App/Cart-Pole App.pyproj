@@ -4,7 +4,8 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>3d85f1f7-bde4-414c-9bcc-0569abf2e432</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>Cart_Pole_App.py</StartupFile>
+    <StartupFile>
+    </StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>

@@ -11,7 +11,7 @@ import datetime
 # General NN parameters
 trainingPct                 = 90            # The amount of data to use for training
 epochs                      = 100          # Number of iterations or training cycles, includes both the FeedFoward and Backpropogation
-learning_rate               = 0.01          # Learning Rate 
+learning_rate               = 0.0001          # Learning Rate 
 dropout_output_keep_prob    = .75           # Percentage of neurons to keep between 
 hidden_layer_widths         = [100]         # List of hidden layer widths (num neurons per hidden layer)
 display_step                = 100           # How often to update the console with text
@@ -27,7 +27,7 @@ retrain_state               = 10            # The number of times to repeat the 
 # Cart Pole Physics Model parameters
 dt = 0.02                                   # Time delta for each step
 useOpenAImodel = True                       # Use the OpenAI cart pole model
-renderOpenAImodel = False                   # Render a movie of the OpenAI progress, does not work in spyder gui
+renderOpenAImodel = True                    # Render a movie of the OpenAI progress, does not work in spyder gui
 
 
 # Path settings, checks for Windows environment to choose between \ and /

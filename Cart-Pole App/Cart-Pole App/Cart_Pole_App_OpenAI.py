@@ -3,7 +3,7 @@
 """
 Author:         David Beam, db4ai
 Date:           18 January 2018
-Description:    Create a MLP NN, train using the supplied dataset then test and display the test results on a chart
+Description:    
 """
 # Include files
 import gym
@@ -75,31 +75,31 @@ def critic_update(critic_w1, critic_w2, error, x_a, _p, alpha):
 def plot_results(angle_hist,vel_hist,j_hist,u_hist,x_hist,aw1_hist,aw2_hist,cw1_hist,cw2_hist):
     plt.title("pendulum angle over time", fontsize=14)
     plt.plot(angle_hist)
-    plt.show()
-    plt.title("cart vel over time", fontsize=14)
-    plt.plot(vel_hist)
-    plt.show()
-    plt.title("cost-to-go", fontsize=14)
-    plt.plot(j_hist)
-    plt.show()
-    plt.title("force over time", fontsize=14)
-    plt.plot(u_hist)
-    plt.show()
+    #plt.show()
+    #plt.title("cart vel over time", fontsize=14)
+    #plt.plot(vel_hist)
+    #plt.show()
+    #plt.title("cost-to-go", fontsize=14)
+    #plt.plot(j_hist)
+    #plt.show()
+    #plt.title("force over time", fontsize=14)
+    #plt.plot(u_hist)
+    #plt.show()
     plt.title("x-dist over time", fontsize=14)
     plt.plot(x_hist)
     plt.show()
-    plt.title("action w1 mean over time", fontsize=14)
-    plt.plot(aw1_hist)
-    plt.show()
-    plt.title("action w2 mean over time", fontsize=14)
-    plt.plot(aw2_hist)
-    plt.show()
-    plt.title("critic w1 mean over time", fontsize=14)
-    plt.plot(cw1_hist)
-    plt.show()
-    plt.title("critic w2 mean over time", fontsize=14)
-    plt.plot(cw2_hist)
-    plt.show()
+    #plt.title("action w1 mean over time", fontsize=14)
+    #plt.plot(aw1_hist)
+    #plt.show()
+    #plt.title("action w2 mean over time", fontsize=14)
+    #plt.plot(aw2_hist)
+    #plt.show()
+    #plt.title("critic w1 mean over time", fontsize=14)
+    #plt.plot(cw1_hist)
+    #plt.show()
+    #plt.title("critic w2 mean over time", fontsize=14)
+    #plt.plot(cw2_hist)
+    #plt.show()
     
 func.print_header()
 

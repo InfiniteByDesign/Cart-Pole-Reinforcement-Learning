@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 15
-VisualStudioVersion = 15.0.27130.2024
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29102.190
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Cart-Pole App", "Cart-Pole App\Cart-Pole App.pyproj", "{3D85F1F7-BDE4-414C-9BCC-0569ABF2E432}"
+EndProject
+Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "Cart-Pole GUI", "Cart-Pole GUI\Cart-Pole GUI.pyproj", "{E44CA2D8-E41D-4891-9AB2-D04CC48B2F7D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,6 +15,8 @@ Global
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{3D85F1F7-BDE4-414C-9BCC-0569ABF2E432}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3D85F1F7-BDE4-414C-9BCC-0569ABF2E432}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E44CA2D8-E41D-4891-9AB2-D04CC48B2F7D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E44CA2D8-E41D-4891-9AB2-D04CC48B2F7D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
