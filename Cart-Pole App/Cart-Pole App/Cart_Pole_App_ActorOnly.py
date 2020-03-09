@@ -138,10 +138,10 @@ for epoch in range(cfg.epochs):
                     
         # Action
         u, g = action_output(action_w1,action_w2,X)
-        if u >= 0:
-            u = 10         # force
-        elif u < 0:
-            u = -10        # force
+        if u <= 0:
+            u = -10         # force
+        else:
+            u = 10        # force
                     
         # Calculate the change in state then the new state matrix
         # state = [ang, ang vel, dist, vel]
