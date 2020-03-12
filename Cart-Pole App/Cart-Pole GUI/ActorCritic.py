@@ -13,24 +13,24 @@ import gym
 # Actor Network Functions
 # -------------------------------------------------------------------------
    
-def action_output(w1, w2, X):
+def actor_output(w1, w2, X):
     hidden  = np.dot(X,w1)
     g       = (1-np.exp(-hidden))/(1+np.exp(-hidden))
     v       = np.dot(g,w2)
     u       = (1-np.exp(-v))/(1+np.exp(-v))
     return u, g
 
-def action_cost(J):
+def actor_cost(J):
     return 0.5 * J**2
 
-def action_update(action_w1, action_w2, critic_factor, error, X, u, g): 
+def actor_update(actor_w1, actor_w2, critic_factor, error, X, u, g, actor_width): 
     # Change in w2
-    d_w2 = (0.5 * error * (1 - np.power(u,2)) * g * critic_factor).reshape(24,1)
+    d_w2 = (0.5 * error * (1 - np.power(u,2)) * g * critic_factor).reshape(actor_width,1)
     # Change in w1
-    d_w1 = np.outer(X,0.5 * error * (1 - np.power(u,2)) * action_w2 * 0.5 * (1 - np.power(g.reshape(24,1),2)) * critic_factor)
+    d_w1 = np.outer(X,0.5 * error * (1 - np.power(u,2)) * actor_w2 * 0.5 * (1 - np.power(g.reshape(actor_width,1),2)) * critic_factor)
     # Normalize the weights
-    w1 = (action_w1 + d_w1) / np.linalg.norm(action_w1 + d_w1, ord=1)
-    w2 = (action_w2 + d_w2) / np.linalg.norm(action_w2 + d_w2, ord=1)
+    w1 = (actor_w1 + d_w1) / np.linalg.norm(actor_w1 + d_w1, ord=1)
+    w2 = (actor_w2 + d_w2) / np.linalg.norm(actor_w2 + d_w2, ord=1)
     
     return w1, w2
 
@@ -47,12 +47,12 @@ def critic_output(w1, w2, input):
 def critic_cost(alpha, J, Jlast, r):
     return 0.5*(alpha*J - (Jlast-r))**2
 
-def critic_update(critic_w1, critic_w2, error, x_a, _p, alpha):
+def critic_update(critic_w1, critic_w2, actor_w2, error, x_a, _p, alpha, critic_width):
     # Change in w2
-    d_w2    = (alpha*error * _p).reshape(24,1)
+    d_w2    = (alpha*error * _p).reshape(critic_width,1)
     # Change in w1
     temp_a  = x_a.reshape(6,1)
-    temp_b  = alpha * error * action_w2 * (0.5*(1-np.power(_p,2).reshape(24,1)))
+    temp_b  = alpha * error * actor_w2 * (0.5*(1-np.power(_p,2).reshape(critic_width,1)))
     d_w1    = np.outer(temp_a,temp_b)
     # Normalize the weights
     w1 = (critic_w1 + d_w1) / np.linalg.norm(critic_w1 + d_w1, ord=1)
@@ -82,8 +82,7 @@ class ActorCriticClass:
         self.std_dev            = 0
         self.epochs             = 0
         self.retrain_state      = 0
-        self.learning_rate      = 0        
-        alpha                   = 0
+        self.learning_rate      = 0  
         self.alpha              = 0
         self.max_episode_steps  = 0
         # Model Weights
@@ -134,8 +133,8 @@ class ActorCriticClass:
     def Set_Hyperparameters(self):
         # General NN parameters
         self.epochs             = 100           # Number of iterations or training cycles, includes both the FeedFoward and Backpropogation
-        self.actor_width        = 100
-        self.critic_width       = 100
+        self.actor_width        = 24
+        self.critic_width       = 24
         self.bias               = 0.0           # Mean value of the normal distribution used to initialize the weights and biases
         self.std_dev            = 1.0           # Standard Deviation of the normal distribution used to initialize the weights and biases
         self.learning_rate      = 0.0001        # Learning Rate 
@@ -216,7 +215,7 @@ class ActorCriticClass:
             while fail==False and i < self.max_episode_steps:
                     
                 # Action
-                u, g = action_output(self.actor_w1, self.actor_w2, X)
+                u, g = actor_output(self.actor_w1, self.actor_w2, X)
                 if u >= 0:
                     u = 10          # force
                     action_u = 1    # OpenAI action state
@@ -252,13 +251,13 @@ class ActorCriticClass:
                 J, _p           = critic_output(self.critic_w1,self.critic_w2,critic_input)
         
                 # Calculate the action and critic error
-                Ea = action_cost(J)
+                Ea = actor_cost(J)
                 Ec = critic_cost(self.alpha, J, Jlast, r)
         
                 # Update the weights
                 for update in range(update_range):
-                    self.critic_w1, self.critic_w2, critic_factor = critic_update(self.critic_w1, self.critic_w2, Ec, critic_input, _p, self.alpha)
-                    self.actor_w1, self.actor_w2 = action_update(self.actor_w1, self.actor_w2, critic_factor, 0.1*Ea, X, u, g)
+                    self.critic_w1, self.critic_w2, critic_factor = critic_update(self.critic_w1, self.critic_w2, self.actor_w2, Ec, critic_input, _p, self.alpha, self.critic_width)
+                    self.actor_w1, self.actor_w2 = actor_update(self.actor_w1, self.actor_w2, critic_factor, 0.1*Ea, X, u, g, self.actor_width)
        
                 # Save history
                 angle_hist.append(angle)
@@ -279,7 +278,7 @@ class ActorCriticClass:
                     print("Epoch:", '%04d' % (self.epoch+1), "max was:", '%06d' % (self.max_index + 1), "steps, this epoch was:", '%06d' % (i + 1))
 
                     # Save best run only
-                    if i > max_i:
+                    if i > self.max_index:
                         self.max_index = i
                         self.best_angle_hist = angle_hist
                         self.best_vel_hist   = vel_hist

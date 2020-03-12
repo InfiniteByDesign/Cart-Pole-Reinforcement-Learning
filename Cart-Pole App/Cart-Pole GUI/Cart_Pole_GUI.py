@@ -7,9 +7,18 @@ import ActorCritic
 
 # listen for buttons
 def initialize(button):
+    #ac.actor_width = 100
+    #ac.critic_width = 100
+    #ac.bias = 
+    #ac.std_dev = 
+    #ac.epochs = 
+    #ac.retrain_state = 
+    #ac.learning_rate = 
+    #ac.alpha = 
+    #ac.max_episode_steps = 
+    ac.Set_Hyperparameters()
     ac.InitializeWeights()
     ac.InitializeHistory()
-    ac.Set_Hyperparameters()
 
 def trainInit(button):
     ac.Train_Init()
