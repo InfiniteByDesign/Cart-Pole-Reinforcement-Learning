@@ -7,15 +7,6 @@ import ActorCritic
 
 # listen for buttons
 def initialize(button):
-    #ac.actor_width = 100
-    #ac.critic_width = 100
-    #ac.bias = 
-    #ac.std_dev = 
-    #ac.epochs = 
-    #ac.retrain_state = 
-    #ac.learning_rate = 
-    #ac.alpha = 
-    #ac.max_episode_steps = 
     ac.Set_Hyperparameters()
     ac.InitializeWeights()
     ac.InitializeHistory()
@@ -27,14 +18,58 @@ def trainStep(button):
     ac.Train_Step()
 
 # create a GUI variable called app
-app = gui()
+app = gui("Actor-Critic Cart Pole Example", "400x200")
 
 # add & configure widgets - widgets get a name, to help referencing them later
-app.addLabel("title", "Welcome to appJar")
-app.setLabelBg("title", "red")
-app.addButtons(["Initialize"], initialize)
-app.addButtons(["Train Init"], trainInit)
-app.addButtons(["Train"], trainStep)
+app.addLabel("l1", "Initialization", 0, 0, 3)
+app.setLabelBg("l1", "green")
+app.addButtons(["Initialize Weights/History"], initialize, 1, 0)
+app.addButtons(["Reset Training"], trainInit, 1, 2)
+
+
+app.addLabel("l2", "Hyperparameters", 2, 0, 3)
+app.setLabelBg("l2", "green")
+
+app.addLabel("l3", "Actor NN Width", 3, 0, 1)
+app.addNumericEntry("actorWidth", 3, 1, 2)
+
+app.addLabel("l4", "Critic NN Width", 4, 0, 1)
+app.addNumericEntry("criticWidth", 4, 1, 2)
+
+app.addLabel("l5", "Weights Bias", 5, 0, 1)
+app.addNumericEntry("bias", 5, 1, 2)
+
+app.addLabel("l6", "Weights Std Dev", 6, 0, 1)
+app.addNumericEntry("stddev", 6, 1, 2)
+
+app.addLabel("l7", "Num of Episodes", 7, 0, 1)
+app.addNumericEntry("episodes", 7, 1, 2)
+
+app.addLabel("l8", "Num of Epochs", 8, 0, 1)
+app.addNumericEntry("epochs", 8, 1, 2)
+
+app.addLabel("l9", "Retrain # per Epoch", 9, 0, 1)
+app.addNumericEntry("retrains", 9, 1, 2)
+
+app.addLabel("l10", "Learning Rate", 10, 0, 1)
+app.addNumericEntry("learningrate", 10, 1, 2)
+
+app.addLabel("l11", "Alpha", 11, 0, 1)
+app.addNumericEntry("alpha", 4, 1, 2)
+
+
+app.setEntryDefault("actorWidth", "100")
+app.setEntryDefault("criticWidth", "100")
+app.setEntryDefault("bias", "0.0")
+app.setEntryDefault("stddev", "1.0")
+app.setEntryDefault("episodes", "600000")
+app.setEntryDefault("epochs", "100")
+app.setEntryDefault("retrains", "10")
+app.setEntryDefault("learningrate", "0.0001")
+app.setEntryDefault("alpha", "0.1")
+
+
+app.addButtons(["Train"], trainStep, 12, 0, 1)
 
 # initilze objects
 ac = ActorCritic.ActorCriticClass()
