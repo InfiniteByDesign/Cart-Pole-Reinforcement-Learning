@@ -59,7 +59,7 @@ def critic_update(critic_w1, critic_w2, error, x_a, _p, alpha):
     d_w2    = (alpha*error * _p).reshape(24,1)
     # Change in w1
     temp_a  = x_a.reshape(6,1)
-    temp_b  = alpha * error * action_w2 * (0.5*(1-np.power(_p,2).reshape(24,1)))
+    temp_b  = alpha * error * critic_w2 * (0.5*(1-np.power(_p,2).reshape(24,1)))
     d_w1    = np.outer(temp_a,temp_b)
     # Normalize the weights
     w1 = (critic_w1 + d_w1) / np.linalg.norm(critic_w1 + d_w1, ord=1)
