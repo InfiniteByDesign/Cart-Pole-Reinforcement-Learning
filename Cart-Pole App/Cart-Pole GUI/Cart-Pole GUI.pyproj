@@ -733,6 +733,7 @@
     <Content Include="appJar\resources\icons\zoom.png" />
     <Content Include="appJar\__pycache__\appjar.cpython-36.pyc" />
     <Content Include="appJar\__pycache__\__init__.cpython-36.pyc" />
+    <Content Include="Cart-Pole Results.csv" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda36-64" />

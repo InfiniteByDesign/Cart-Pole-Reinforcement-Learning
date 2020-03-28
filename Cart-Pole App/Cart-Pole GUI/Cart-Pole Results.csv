@@ -1,0 +1,2 @@
+Last Trial Number,Max Number of Steps,Result,Actor Width,Actor Train Cycles,Actor Init Learn Rate,Actor Last Learn Rate,Actor Learn Rate Decay,Actor Min Learn Rate,Actor Error Threshold,Critic Width,Critic Train Cycles,Critic Init Learn Rate,Critic Last Learn Rate,Critic Learn Rate Decay,Critic Min Learn Rate,Critic Error Threshold,Discount Factor,Init Weights Low Limit,Init Weights High Limit,Max number of Trials,Steps to Success
+10,181,Failed,24,100,0.3,0.005,0.05,0.005,0.005,24,50,0.3,0.05,0.05,0.005,0.05,0.0001,-1.0,1.0,10,200

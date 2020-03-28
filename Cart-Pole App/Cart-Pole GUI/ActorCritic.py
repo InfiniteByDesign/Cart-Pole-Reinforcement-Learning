@@ -99,15 +99,10 @@ def actor_cost(J):
     return 0.5 * J**2
 
 def actor_update(actor_w1, actor_w2, critic_factor, error, X, u, g, actor_width, learning_rate): 
-    # Change in w2
-    #d_w2 = (0.5 * error * (1 - np.power(u,2)) * g * critic_factor).reshape(actor_width,1)
-    #d_w2 = (0.5 * error * (1 - np.power(g,2))).reshape(actor_width,1)
-    # Change in w1
-    #d_w1 = np.outer(X,0.5 * error * (1 - np.power(u,2)) * actor_w2 * 0.5 * (1 - np.power(g.reshape(actor_width,1),2)) * critic_factor)    
-    #d_w1 = -learning_rate * error * 0.5*(1-np.power(u,2)) * np.outer(np.multiply(actor_w2, (0.5 * error * (1 - np.power(g,2))).reshape(actor_width,1)), X) * critic_factor
+    # Change in w1 and w2
     d_w1 = -learning_rate * error * 0.5*(1-np.power(u,2)) * np.outer(np.multiply(actor_w2, (1 - np.power(g,2)).reshape(actor_width,1)), X) * critic_factor
     d_w2 = -learning_rate * error * 0.5*(1-np.power(u,2)) * g * critic_factor
-    # Normalize the weights
+    # Update the weights
     w1 = actor_w1 + np.transpose(d_w1)
     w2 = actor_w2 + np.transpose(d_w2)
 
@@ -168,14 +163,7 @@ def critic_update(critic_w1, critic_w2, error, x_a, _p, alpha, critic_width, cri
     temp_a  = x_a.reshape(critic_inputs,1)
     temp_b  = -learning_rate * alpha * error * critic_w2 * (0.5*(1-np.power(_p,2).reshape(critic_width,1)))
     d_w1    = np.outer(temp_a,temp_b)
-    # Normalize the weights
-    #w1 = (critic_w1 + d_w1) / Norm1(critic_w1 + d_w1)
-    #w2 = (critic_w2 + d_w2) / Norm1(critic_w2 + d_w2)    
-    # Compute the critic factor used to update the action network (before the weights are updated)
-    #critic_factor = np.sum( 0.5*w2*(1-np.power(_p,2)) * w1[4,:] )
-    #critic_factor = np.sum( 0.5* critic_w2*(1-np.power(_p,2)) * critic_w1[4,:] )
-    #critic_factor = np.sum( 0.5 * np.transpose(critic_w2)*(1-np.power(_p,2)) * critic_w1[4,:] )
-    # Output
+    # Update the weights
     w1 = critic_w1 + d_w1
     w2 = critic_w2 + d_w2
     return w1, w2
@@ -213,8 +201,8 @@ class ActorCriticClass:
         self.critic_err_thresh  = 0 # Minimum error threshold, don't train below threshold
         self.alpha              = 0 # cost-to-go discount factor
 
-        self.bias               = 0 # Mean value of the normal distribution used to initialize the weights and biases
-        self.std_dev            = 0 # Standard Deviation of the normal distribution used to initialize the weights and biases
+        self.lowlimit           = 0 # Lower limit of uniform distribution used to initialize the weights and biases
+        self.highlimit          = 0 # Upper limit of uniform distribution used to initialize the weights and biases
         
         self.epochs             = 0 # Number of iterations or training cycles, includes both the FeedFoward and Backpropogation
         self.max_episode_steps  = 0 # Max number of trials before ending the experiment
@@ -254,10 +242,6 @@ class ActorCriticClass:
 
     # Initialize Weights, there are 4 inputs to the actor and 6 inputs to the critic
     def InitializeWeights(self):
-        #self.actor_w1  = np.ones((self.actor_inputs,self.actor_width),dtype=float)  * np.random.normal(self.bias,self.std_dev,(self.actor_inputs,self.actor_width))
-        #self.actor_w2  = np.ones((self.actor_width,1),dtype=float)  * np.random.normal(self.bias,self.std_dev,(self.actor_width,1))
-        #self.critic_w1 = np.ones((self.critic_inputs,self.critic_width),dtype=float) * np.random.normal(self.bias,self.std_dev,(self.critic_inputs,self.critic_width))
-        #self.critic_w2 = np.ones((self.critic_width,1),dtype=float) * np.random.normal(self.bias,self.std_dev,(self.critic_width,1))
         self.actor_w1  = np.ones((self.actor_inputs,self.actor_width),dtype=float)  * np.random.uniform(-1,1,(self.actor_inputs,self.actor_width))
         self.actor_w2  = np.ones((self.actor_width,1),dtype=float)  * np.random.uniform(-1,1,(self.actor_width,1))
         self.critic_w1 = np.ones((self.critic_inputs,self.critic_width),dtype=float) * np.random.uniform(-1,1,(self.critic_inputs,self.critic_width))
@@ -286,7 +270,7 @@ class ActorCriticClass:
     # Set Hyperparameters
     # -------------------------------------------------------------------------
 
-    def Set_Hyperparameters(self, actorWidth, actorCycle, actorlearningrate, actorLearnDecay, actorMinLearn, actorErrThreshold, criticWidth, criticCycle, criticlearningrate, criticLearnDecay, criticMinLearn, criticErrThreshold, alpha, bias, stddev, epochs, episodes, showOpenAI):
+    def Set_Hyperparameters(self, actorWidth, actorCycle, actorlearningrate, actorLearnDecay, actorMinLearn, actorErrThreshold, criticWidth, criticCycle, criticlearningrate, criticLearnDecay, criticMinLearn, criticErrThreshold, alpha, lowlimit, highlimit, epochs, episodes, showOpenAI):
         
         self.actor_width        = actorWidth            # The number of hidden neurons in the single hidden layer, actor
         self.actor_cycle        = actorCycle            # Number of times to retrain each time step
@@ -303,8 +287,8 @@ class ActorCriticClass:
         self.critic_err_thresh  = criticErrThreshold    # Minimum error threshold, don't train below threshold
         self.alpha              = alpha                 # cost-to-go discount factor
 
-        self.bias               = bias                  # Mean value of the normal distribution used to initialize the weights and biases
-        self.std_dev            = stddev                # Standard Deviation of the normal distribution used to initialize the weights and biases
+        self.lowlimit           = lowlimit              # Lower limit of uniform distribution used to initialize the weights and biases
+        self.highlimit          = highlimit             # Upper limit of uniform distribution used to initialize the weights and biases
         
         self.epochs             = epochs                # Number of iterations or training cycles, includes both the FeedFoward and Backpropogation
         self.max_episode_steps  = episodes              # Max number of trials before ending the experiment
@@ -342,7 +326,7 @@ class ActorCriticClass:
     # Train for one step
     def Train_Step(self):
         # Placeholders
-        self.latest_criticcost  = []
+        self.latest_criticcost = []
         angle_hist  = []
         vel_hist    = []
         j_hist      = []
@@ -352,6 +336,7 @@ class ActorCriticClass:
         aw2_hist    = []
         cw1_hist    = []
         cw2_hist    = []
+        success_string = ""
 
         # Continue training if we are not done
         if self.epoch < self.epochs and self.trainingDone != True:
@@ -383,7 +368,10 @@ class ActorCriticClass:
     
             # Loop through the iterations until fail or pass
             while fail==False and i < self.max_episode_steps:
-                    
+                
+                # Increment the setp index
+                i = i + 1
+    
                 # Action
                 u, g = actor_output(self.actor_w1, self.actor_w2, X/self.stateNorm)
                 if u >= 0:
@@ -455,7 +443,7 @@ class ActorCriticClass:
                 if self.critic_lrate < self.critic_learn_decay: self.critic_lrate = self.critic_learn_decay
 
                 # Save history
-                
+                self.latest_criticcost.append(Ec)
                 angle_hist.append(angle)
                 vel_hist.append(X[0,3])
                 j_hist.append(J[0,0])
@@ -468,35 +456,40 @@ class ActorCriticClass:
 
                 # Break the loop if we fail to keep the angle in range
                 if r == -1:
+                    success_string = "Failed"
                     fail = True
             
-                    # Save best run only
-                    if i > self.max_index:
-                        self.max_index = i
-                        self.best_criticcost = self.latest_criticcost
-                        self.best_angle_hist = angle_hist
-                        self.best_vel_hist   = vel_hist
-                        self.best_j_hist     = j_hist  
-                        self.best_u_hist     = u_hist
-                        self.best_x_hist     = x_hist
-                        self.best_aw1_hist   = aw1_hist
-                        self.best_aw2_hist   = aw2_hist
-                        self.best_cw1_hist   = cw1_hist
-                        self.best_cw2_hist   = cw2_hist
-
                     # Print a summary
                     print("Epoch:", '%04d' % (self.epoch), "max was:", '%06d' % (self.max_index), "steps, this epoch was:", '%06d' % i)
 
                 # Check if we reached the max time step
                 if i == self.max_episode_steps:
+                    success_string = "Success"
                     self.trainingDone = True
-                    print("Epoch:", '%04d' % (self.epoch), " MAX STEP COUNT REACHED, 600,000!")
-    
-                # Increment the time index and save variables
-                i = i + 1
+                    print("Epoch:", '%04d' % (self.epoch), " MAX STEP COUNT REACHED!")
+                
+                # Training is done if we have reached the maximum number of trials (epochs)
+                if self.epoch == self.epochs:
+                    self.trainingDone = True
+
+                # Save best run only
+                if i > self.max_index:
+                    self.max_index = i
+                    self.best_criticcost = self.latest_criticcost
+                    self.best_angle_hist = angle_hist
+                    self.best_vel_hist   = vel_hist
+                    self.best_j_hist     = j_hist  
+                    self.best_u_hist     = u_hist
+                    self.best_x_hist     = x_hist
+                    self.best_aw1_hist   = aw1_hist
+                    self.best_aw2_hist   = aw2_hist
+                    self.best_cw1_hist   = cw1_hist
+                    self.best_cw2_hist   = cw2_hist
+
+                # Save the last critic cost
                 Jlast = J
     
             # This training sequence has failed or has finished, return the results
-            return self.epoch, i-1, self.max_index
+            return self.epoch, i, self.max_index, success_string, self.trainingDone, self.actor_width, self.actor_cycle, self.actor_learn_rate, self.actor_lrate, self.actor_learn_decay, self.actor_learn_min, self.actor_err_thresh, self.critic_width, self.critic_cycle, self.critic_learn_rate, self.critic_lrate, self.critic_learn_decay, self.critic_learn_min, self.critic_err_thresh, self.alpha, self.lowlimit, self.highlimit, self.epochs, self.max_episode_steps
 
 

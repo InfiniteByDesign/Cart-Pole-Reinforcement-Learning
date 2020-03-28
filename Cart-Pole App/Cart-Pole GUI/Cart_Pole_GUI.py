@@ -6,10 +6,22 @@ from appJar.appjar import gui
 import ActorCritic
 import numpy as np
 import datetime
+import csv
 
-mess1 = "Set initial hyperparameters, then press 'Apply'"
-mess2 = "Initialze weights and reset history by pressing 'Initialize'"
-mess3 = "Run a training sequence by pressing 'Train'"
+mess1 = "Set initial hyperparameters, then press 'Apply/Initialize'"
+mess2 = "Run a training sequence by pressing one of the 'Train' buttons"
+mess3 = "When all trials are complete, you must 'Apply/Initialize' before restarting training"
+mess4 = "Running all trials, wait for trials to complete"
+mess5 = "All trials are complete, you must 'Apply/Initialize' before restarting training"
+
+# Write results to a CSV file
+def WriteResults(epoch, maxsteps, success_string, actor_width, actor_cycle, actor_learn_rate, actor_lrate, actor_learn_decay, actor_learn_min, actor_err_thresh, critic_width, critic_cycle, critic_learn_rate, critic_lrate, critic_learn_decay, critic_learn_min, critic_err_thresh, alpha, lowlimit, highlimit, epochs, max_episode_steps):
+    # Create the output string
+    outpuline = [epoch, maxsteps, success_string, actor_width, actor_cycle, actor_learn_rate, actor_lrate, actor_learn_decay, actor_learn_min, actor_err_thresh, critic_width, critic_cycle, critic_learn_rate, critic_lrate, critic_learn_decay, critic_learn_min, critic_err_thresh, alpha, lowlimit, highlimit, epochs, max_episode_steps]
+    # Open the csv file and write the data
+    with open("Cart-Pole Results.csv", mode='a') as writeFile:
+        writer = csv.writer(writeFile)
+        writer.writerow(outpuline)
 
 # listen for buttons
 def trainInit(button):
@@ -32,24 +44,22 @@ def trainInit(button):
     alpha               = app.getEntry("alpha")
 
     # Get other Parameters
-    bias                = app.getEntry("bias")
-    stddev              = app.getEntry("stddev")
+    lowlimit            = app.getEntry("lowlimit")
+    highlimit           = app.getEntry("highlimit")
     epochs              = int(app.getEntry("epochs"))
     episodes            = int(app.getEntry("episodes"))
     showOpenAI          = app.getCheckBox("showOpenAI")
 
     # Initialize and set the hyperparameters
-    ac.Set_Hyperparameters(actorWidth, actorCycle, actorlearningrate, actorLearnDecay, actorMinLearn, actorErrThreshold, criticWidth, criticCycle, criticlearningrate, criticLearnDecay, criticMinLearn, criticErrThreshold, alpha, bias, stddev, epochs, episodes, showOpenAI)
+    ac.Set_Hyperparameters(actorWidth, actorCycle, actorlearningrate, actorLearnDecay, actorMinLearn, actorErrThreshold, criticWidth, criticCycle, criticlearningrate, criticLearnDecay, criticMinLearn, criticErrThreshold, alpha, lowlimit, highlimit, epochs, episodes, showOpenAI)
     ac.Train_Init()
-    app.setMessage("message", mess2)
 
-def initialize(button):
     ac.InitializeWeights()
     ac.InitializeHistory()
-    app.setMessage("message", mess3)
+    app.setMessage("message", mess2)
 
 def trainStep(button):
-    epoch, steps, maxsteps = ac.Train_Step()
+    epoch, steps, maxsteps, success_string, trainingDone, actor_width, actor_cycle, actor_learn_rate, actor_lrate, actor_learn_decay, actor_learn_min, actor_err_thresh, critic_width, critic_cycle, critic_learn_rate, critic_lrate, critic_learn_decay, critic_learn_min, critic_err_thresh, alpha, lowlimit, highlimit, epochs, max_episode_steps = ac.Train_Step()
 
     # Converting datetime object to string
     timestampStr = (datetime.datetime.now()).strftime("%d-%b-%Y (%H:%M:%S)")
@@ -57,26 +67,39 @@ def trainStep(button):
     app.setLabel("2_LastEpoch", "Last Epoch: " + str(epoch))
     app.setLabel("2_LastSteps", "Last # of Steps: " + str(steps))
     app.setLabel("2_BestSteps", "Best # of Steps: " + str(maxsteps))
+    app.setLabel("2_SuccessString", "Result: " + str(success_string))
     # Update the plots
     stepsc, cCost, stepsb, cCostBest = ac.GetCostHistory()
     axes = app.updatePlot("CriticCost", stepsc, np.squeeze(cCost))
     axes = app.updatePlot("BestCriticCost", stepsb, np.squeeze(cCostBest))
+    if trainingDone == True:
+        app.setMessage("message", mess5)
+        WriteResults(epoch, maxsteps, success_string, actor_width, actor_cycle, actor_learn_rate, actor_lrate, actor_learn_decay, actor_learn_min, actor_err_thresh, critic_width, critic_cycle, critic_learn_rate, critic_lrate, critic_learn_decay, critic_learn_min, critic_err_thresh, alpha, lowlimit, highlimit, epochs, max_episode_steps)
+    else:
+        app.setMessage("message", mess3)
 
 def trainAll(button):    
-    # Loop through all epochs until done or success
+    # Loop through all epochs until done or success    
+    app.setMessage("message", mess3)
     while ac.epoch < ac.epochs and ac.trainingDone != True:
         # Train the next step
-        epoch, steps, maxsteps = ac.Train_Step() 
+        epoch, steps, maxsteps, success_string, trainingDone, actor_width, actor_cycle, actor_learn_rate, actor_lrate, actor_learn_decay, actor_learn_min, actor_err_thresh, critic_width, critic_cycle, critic_learn_rate, critic_lrate, critic_learn_decay, critic_learn_min, critic_err_thresh, alpha, lowlimit, highlimit, epochs, max_episode_steps = ac.Train_Step()
         # Update the results on the output tab
         timestampStr = (datetime.datetime.now()).strftime("%d-%b-%Y (%H:%M:%S)")
         app.setLabel("2_LastRun", "Last Run: " + str(timestampStr))
         app.setLabel("2_LastEpoch", "Last Epoch: " + str(epoch))
         app.setLabel("2_LastSteps", "Last # of Steps: " + str(steps))
         app.setLabel("2_BestSteps", "Best # of Steps: " + str(maxsteps))
+        app.setLabel("2_SuccessString", "Result: " + str(success_string))
         # Update the plots
         stepsc, cCost, stepsb, cCostBest = ac.GetCostHistory()
         axes = app.updatePlot("CriticCost", stepsc, np.squeeze(cCost))
         axes = app.updatePlot("BestCriticCost", stepsb, np.squeeze(cCostBest))
+        if trainingDone == True:
+            app.setMessage("message", mess5)
+            WriteResults(epoch, maxsteps, success_string, actor_width, actor_cycle, actor_learn_rate, actor_lrate, actor_learn_decay, actor_learn_min, actor_err_thresh, critic_width, critic_cycle, critic_learn_rate, critic_lrate, critic_learn_decay, critic_learn_min, critic_err_thresh, alpha, lowlimit, highlimit, epochs, max_episode_steps)
+        else:
+            app.setMessage("message", mess4)
 
 def setupTab1(gui):
     gui.startTab("Setup")
@@ -117,24 +140,23 @@ def setupTab1(gui):
     gui.setEntry("alpha", "0.0001")
     gui.stopLabelFrame()
 
-    gui.startLabelFrame("NN Weights Initialization - Gausian Distribution")
-    gui.addLabel("l5a", "Weights Bias", row, 0);            gui.addNumericEntry("bias", row, 1)
-    gui.addLabel("l5b", "Weights Std Dev", row, 2);         gui.addNumericEntry("stddev", row, 3);                  row=row+1
-    gui.setEntry("bias", "0.0")
-    gui.setEntry("stddev", "1.0")
+    gui.startLabelFrame("NN Weights Initialization - Uniform Distribution")
+    gui.addLabel("l5a", "Lower Limit", row, 0);            gui.addNumericEntry("lowlimit", row, 1)
+    gui.addLabel("l5b", "Upper Limit", row, 2);         gui.addNumericEntry("highlimit", row, 3);                   row=row+1
+    gui.setEntry("lowlimit", "-1.0")
+    gui.setEntry("highlimit", "1.0")
     gui.stopLabelFrame()
 
     gui.startLabelFrame("Flow Control")
     gui.addLabel("l6a", "Total Num Trials", row, 0);        gui.addNumericEntry("epochs", row, 1); 
     gui.addLabel("l6b", "Num of Steps to Success", row, 2); gui.addNumericEntry("episodes", row, 3);                row=row+1
     gui.addNamedCheckBox("Show Cart-Pole Animation", "showOpenAI", row, 0);                                         row=row+1
-    gui.setEntry("epochs", "100")
-    gui.setEntry("episodes", "10000")
+    gui.setEntry("epochs", "10")
+    gui.setEntry("episodes", "200")
     gui.setCheckBox("showOpenAI")
     gui.stopLabelFrame()
     
     gui.stopTab()
-
 
 def setupTab2(gui):
     gui.startTab("Output")
@@ -145,7 +167,8 @@ def setupTab2(gui):
     gui.addLabel("2_LastRun", "Last Run: Not yet run")
     gui.addLabel("2_LastEpoch", "Last Epoch: ")
     gui.addLabel("2_LastSteps", "Last # of Steps: ")
-    gui.addLabel("2_BestSteps", "Best # of Steps: ")    
+    gui.addLabel("2_BestSteps", "Best # of Steps: ")  
+    app.addLabel("2_SuccessString", "Result: ")  
     gui.addEmptyLabel("2_e1")  
     gui.addEmptyLabel("2_e2")  
     gui.addEmptyLabel("2_e3")  
@@ -181,8 +204,7 @@ row = 10
 app.addLabel("l1", "Commands", row, 0, 2)
 app.setLabelBg("l1", "green")
 
-app.addButtons(["Apply Hyperparameters"], trainInit)
-app.addButtons(["Initialize Weights/History"], initialize)
+app.addButtons(["Apply Hyperparameters and Initialize"], trainInit)
 app.addButtons(["Train: Step-by-Step"], trainStep)
 app.addButtons(["Train: All Epochs"], trainAll)
 app.addMessage("message", mess1)
