@@ -7,6 +7,7 @@ import ActorCritic
 import numpy as np
 import datetime
 import csv
+import matplotlib.pyplot as plt
 
 mess1 = "Set initial hyperparameters, then press 'Apply/Initialize'"
 mess2 = "Run a training sequence by pressing one of the 'Train' buttons"
@@ -22,6 +23,41 @@ def WriteResults(epoch, maxsteps, success_string, actor_width, actor_cycle, acto
     with open("Cart-Pole Results.csv", mode='a') as writeFile:
         writer = csv.writer(writeFile)
         writer.writerow(outpuline)
+
+# Read results from a CSV file
+def ReadResults():
+    with open('Cart-Pole Results.csv', 'r') as readFile:
+        results = list(csv.reader(readFile))
+        fullList = []
+        failList = []
+        passList = []
+
+        # Remove the header and make 3 lists, full, fail only and success only
+        skippedHeader = False
+        for line in results:
+            # Skip the first row because it is the header
+            if skippedHeader == False:
+                skippedHeader = True
+            else:
+                # Only append a line if it is not empty
+                if line != []:
+                    # Add to the Success list
+                    if line[2] == "Success":
+                        line[2] = 1
+                        passList.append(line)
+                        fullList.append(line)
+                    # Add to the Fail list
+                    else:
+                        line[2] = 0
+                        failList.append(line)
+                        fullList.append(line)
+        
+        # Convert the lists to arrays
+        fullArray = np.array(fullList, dtype=np.float)
+        failArray = np.array(failList, dtype=np.float)
+        passArray = np.array(passList, dtype=np.float)
+        #results = np.array(list(csv.reader(readFile)))
+    return fullArray, failArray, passArray
 
 # listen for buttons
 def trainInit(button):
@@ -101,6 +137,74 @@ def trainAll(button):
         else:
             app.setMessage("message", mess4)
 
+def plotResults(button):
+    # Read in the CSV file
+    fullArray, failArray, passArray = ReadResults()    
+    
+    # Placeholders for the selected radio and check boxes
+    xaxisIndex = 0
+    yaxisIndex = 0
+
+    # Get the selected radio button
+    switch = app.getRadioButton("x-axis")
+    xlabel = switch
+    if   switch == "Last Trial Number":       xaxisIndex = 0;
+    elif switch == "Max Number of Steps":     xaxisIndex = 1;
+    elif switch == "Result":                  xaxisIndex = 2;
+    elif switch == "Actor Width":             xaxisIndex = 3;
+    elif switch == "Actor Train Cycles":      xaxisIndex = 4;
+    elif switch == "Actor Init Learn Rate":   xaxisIndex = 5;
+    #elif switch == "Actor Last Learn Rate":   xaxisIndex = 6;
+    elif switch == "Actor Learn Rate Decay":  xaxisIndex = 7;
+    elif switch == "Actor Min Learn Rate":    xaxisIndex = 8;
+    elif switch == "Actor Error Threshold":   xaxisIndex = 9;
+    elif switch == "Critic Width":            xaxisIndex = 10;
+    elif switch == "Critic Train Cycles":     xaxisIndex = 11;
+    elif switch == "Critic Init Learn Rate":  xaxisIndex = 12;
+    #elif switch == "Critic Last Learn Rate":  xaxisIndex = 13;
+    elif switch == "Critic Learn Rate Decay": xaxisIndex = 14;
+    elif switch == "Critic Min Learn Rate":   xaxisIndex = 15;
+    elif switch == "Critic Error Threshold":  xaxisIndex = 16;
+    elif switch == "Discount Factor":         xaxisIndex = 17;
+    elif switch == "Init Weights Low Limit":  xaxisIndex = 18;
+    elif switch == "Init Weights High Limit": xaxisIndex = 19;
+    elif switch == "Max number of Trials":    xaxisIndex = 20;
+    elif switch == "Steps to Success":        xaxisIndex = 21; 
+
+    # Get the selected check boxes
+    switch = app.getRadioButton("y-axis")
+    ylabel = switch
+    if   switch == "Last Trial Number":       yaxisIndex = 0;
+    elif switch == "Max Number of Steps":     yaxisIndex = 1;
+    elif switch == "Result":                  yaxisIndex = 2;
+    elif switch == "Actor Width":             yaxisIndex = 3;
+    elif switch == "Actor Train Cycles":      yaxisIndex = 4;
+    elif switch == "Actor Init Learn Rate":   yaxisIndex = 5;
+    #elif switch == "Actor Last Learn Rate":   yaxisIndex = 6;
+    elif switch == "Actor Learn Rate Decay":  yaxisIndex = 7;
+    elif switch == "Actor Min Learn Rate":    yaxisIndex = 8;
+    elif switch == "Actor Error Threshold":   yaxisIndex = 9;
+    elif switch == "Critic Width":            yaxisIndex = 10;
+    elif switch == "Critic Train Cycles":     yaxisIndex = 11;
+    elif switch == "Critic Init Learn Rate":  yaxisIndex = 12;
+    #elif switch == "Critic Last Learn Rate":  yaxisIndex = 13;
+    elif switch == "Critic Learn Rate Decay": yaxisIndex = 14;
+    elif switch == "Critic Min Learn Rate":   yaxisIndex = 15;
+    elif switch == "Critic Error Threshold":  yaxisIndex = 16;
+    elif switch == "Discount Factor":         yaxisIndex = 17;
+    elif switch == "Init Weights Low Limit":  yaxisIndex = 18;
+    elif switch == "Init Weights High Limit": yaxisIndex = 19;
+    elif switch == "Max number of Trials":    yaxisIndex = 20;
+    elif switch == "Steps to Success":        yaxisIndex = 21; 
+
+    # Generate the selected plot    
+    plt.plot(failArray[:,xaxisIndex], failArray[:,yaxisIndex],'ro')
+    plt.plot(passArray[:,xaxisIndex], passArray[:,yaxisIndex],'go')
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
+
+# Functions to setup the elements on each tab
 def setupTab1(gui):
     gui.startTab("Setup")
     
@@ -137,7 +241,7 @@ def setupTab1(gui):
     gui.setEntry("criticLearnDecay", "0.05")
     gui.setEntry("criticMinLearn", "0.005")
     gui.setEntry("criticErrThreshold", "0.05")
-    gui.setEntry("alpha", "0.0001")
+    gui.setEntry("alpha", "0.95")
     gui.stopLabelFrame()
 
     gui.startLabelFrame("NN Weights Initialization - Uniform Distribution")
@@ -183,12 +287,69 @@ def setupTab3(gui):
     gui.stopTab()
 
 def setupTab4(gui):
-    app.startTab("Best Critic Cost")
+    gui.startTab("Best Critic Cost")
     axes = app.addPlot("BestCriticCost", 0, 0)
-    app.stopTab()
+    gui.stopTab()
+
+def setupTab5(gui):
+    gui.startTab("Plot Results")
+    
+    gui.startLabelFrame("X-Axis Parameter", 0, 0)
+    app.addRadioButton("x-axis", "Last Trial Number")
+    app.addRadioButton("x-axis", "Max Number of Steps")
+    app.addRadioButton("x-axis", "Result")
+    app.addRadioButton("x-axis", "Actor Width")
+    app.addRadioButton("x-axis", "Actor Train Cycles")
+    app.addRadioButton("x-axis", "Actor Init Learn Rate")
+    app.addRadioButton("x-axis", "Actor Last Learn Rate")
+    #app.addRadioButton("x-axis", "Actor Learn Rate Decay")
+    app.addRadioButton("x-axis", "Actor Min Learn Rate")
+    app.addRadioButton("x-axis", "Actor Error Threshold")
+    app.addRadioButton("x-axis", "Critic Width")
+    app.addRadioButton("x-axis", "Critic Train Cycles")
+    app.addRadioButton("x-axis", "Critic Init Learn Rate")
+    #app.addRadioButton("x-axis", "Critic Last Learn Rate")
+    app.addRadioButton("x-axis", "Critic Learn Rate Decay")
+    app.addRadioButton("x-axis", "Critic Min Learn Rate")
+    app.addRadioButton("x-axis", "Critic Error Threshold")
+    app.addRadioButton("x-axis", "Discount Factor")
+    app.addRadioButton("x-axis", "Init Weights Low Limit")
+    app.addRadioButton("x-axis", "Init Weights High Limit")
+    app.addRadioButton("x-axis", "Max number of Trials")
+    app.addRadioButton("x-axis", "Steps to Success")
+    gui.stopLabelFrame()
+
+    gui.startLabelFrame("Y-Axis Parameter", 0, 1)
+    app.addRadioButton("y-axis", "Last Trial Number")
+    app.addRadioButton("y-axis", "Max Number of Steps")
+    app.addRadioButton("y-axis", "Result")
+    app.addRadioButton("y-axis", "Actor Width")
+    app.addRadioButton("y-axis", "Actor Train Cycles")
+    app.addRadioButton("y-axis", "Actor Init Learn Rate")
+    #app.addRadioButton("y-axis", "Actor Last Learn Rate")
+    app.addRadioButton("y-axis", "Actor Learn Rate Decay")
+    app.addRadioButton("y-axis", "Actor Min Learn Rate")
+    app.addRadioButton("y-axis", "Actor Error Threshold")
+    app.addRadioButton("y-axis", "Critic Width")
+    app.addRadioButton("y-axis", "Critic Train Cycles")
+    app.addRadioButton("y-axis", "Critic Init Learn Rate")
+    #app.addRadioButton("y-axis", "Critic Last Learn Rate")
+    app.addRadioButton("y-axis", "Critic Learn Rate Decay")
+    app.addRadioButton("y-axis", "Critic Min Learn Rate")
+    app.addRadioButton("y-axis", "Critic Error Threshold")
+    app.addRadioButton("y-axis", "Discount Factor")
+    app.addRadioButton("y-axis", "Init Weights Low Limit")
+    app.addRadioButton("y-axis", "Init Weights High Limit")
+    app.addRadioButton("y-axis", "Max number of Trials")
+    app.addRadioButton("y-axis", "Steps to Success")
+    gui.stopLabelFrame()
+
+    gui.addButtons(["Plot Results"], plotResults)
+
+    gui.stopTab()
 
 # Create a GUI variable called app
-app = gui("Actor-Critic Cart Pole Example", "800x700")
+app = gui("Actor-Critic Cart Pole Example", "800x800")
 app.setFont("8")
 
 # Create Tabs
@@ -198,6 +359,7 @@ setupTab1(app)
 setupTab2(app)
 setupTab3(app)
 setupTab4(app)
+setupTab5(app)
 app.stopTabbedFrame()
 
 row = 10
