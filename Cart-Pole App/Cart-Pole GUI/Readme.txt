@@ -39,7 +39,7 @@ Using this program
     The main workflow is as follows:
     
         1. Choose the hyperparameters by modifying the values on the SETUP tab.
-        2. Press the "Apply Hyperparameters and Initialze" button to write the hyperparameters to the Actor-Critic model
+        2. Press the "Apply Hyperparameters and Initialize" button to write the hyperparameters to the Actor-Critic model
         3. Initiate training through one of two ways
             3a. "Train: Step-by-Step" initiates a single trial where the algorithm runs until the trial is deemed a success or failure
             3b. "Train: All Trials" initiates a continuous training sequence until a trial is deemed a success or the maximum number of trials have failed.
@@ -104,7 +104,7 @@ The following is a description of the different tabs available in the GUI
     
 ----------------------------------------------------------------------------
 
-Additional Information: The following is copied from the ActorCritic.py file and describes the variables and equations used in the Actor and Critc models      
+Additional Information: The following is copied from the ActorCritic.py file and describes the variables and equations used in the Actor and Critic models      
 
 # ------------------------------------------------------------------------------------------------------------------------------------------
 #
