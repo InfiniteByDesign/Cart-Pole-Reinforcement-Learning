@@ -734,6 +734,8 @@
     <Content Include="appJar\__pycache__\appjar.cpython-36.pyc" />
     <Content Include="appJar\__pycache__\__init__.cpython-36.pyc" />
     <Content Include="Cart-Pole Results.csv" />
+    <Content Include="JennieSi_OnlineLearning2001.pdf" />
+    <Content Include="Readme.txt" />
   </ItemGroup>
   <ItemGroup>
     <InterpreterReference Include="Global|ContinuumAnalytics|Anaconda36-64" />

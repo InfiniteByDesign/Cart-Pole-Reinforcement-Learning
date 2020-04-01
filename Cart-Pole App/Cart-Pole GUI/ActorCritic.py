@@ -87,10 +87,12 @@ def Norm1(vector):
 # ------------------------------------------------------------------------------------------------------------------------------------------
    
 def actor_output(w1, w2, X):
-    hidden  = np.dot(X,w1)
-    g       = (1-np.exp(-hidden))/(1+np.exp(-hidden))
-    v       = np.dot(g,w2)
-    u       = (1-np.exp(-v))/(1+np.exp(-v))
+    hidden  = np.dot(X,w1)                              # Multiply input by weights
+    hidden  = np.clip(hidden,-100,100)                  # Clip values to avoid INF in the exponential function
+    g       = (1-np.exp(-hidden))/(1+np.exp(-hidden))   # Apply activation
+    v       = np.dot(g,w2)                              # Multiply previous layer by weights
+    v       = np.clip(v,-100,100)                       # Clip values to avoid INF in the exponential function
+    u       = (1-np.exp(-v))/(1+np.exp(-v))             # Apply activation
     return u, g
 
 def actor_cost(J):
@@ -146,15 +148,18 @@ def actor_update(actor_w1, actor_w2, critic_factor, error, X, u, g, actor_width,
 # ------------------------------------------------------------------------------------------------------------------------------------------
 
 def critic_output(w1, w2, input):
-    q = np.dot(input,w1)
-    _p = (1-np.exp(-q))/(1+np.exp(-q))
-    J = np.dot(_p,w2)
+    q = np.dot(input,w1)                # Multiply input by weights
+    q = np.clip(q,-100,100)             # Clip values to avoid INF in the exponential function
+    _p = (1-np.exp(-q))/(1+np.exp(-q))  # Apply activation
+    J = np.dot(_p,w2)                   # Multiply previous layer by weights
     return J, _p
 
 def critic_cost(alpha, J, Jlast, r):
     # Prediction error:   e_c(t) = alpha * J(t) - [J(t-1)-r(t)]
     # Objective function: E_c(t) = 1/2 * e_c(t)^2
-    return 0.5*(alpha*J - (Jlast-r))**2
+    cost = 0.5*(alpha*J - (Jlast-r))**2
+    if cost != cost: cost = 0       # Make sure cost is not NaN
+    return cost
 
 def critic_update(critic_w1, critic_w2, error, x_a, _p, alpha, critic_width, critic_inputs, learning_rate):
     # Change in w2
@@ -199,13 +204,13 @@ class ActorCriticClass:
         self.critic_learn_decay = 0 # Learning rate decay each time step
         self.critic_learn_min   = 0 # Minimum learning rate
         self.critic_err_thresh  = 0 # Minimum error threshold, don't train below threshold
-        self.alpha              = 0 # cost-to-go discount factor
+        self.alpha              = 0 # The discount factor used in training the critic neural network
 
         self.lowlimit           = 0 # Lower limit of uniform distribution used to initialize the weights and biases
         self.highlimit          = 0 # Upper limit of uniform distribution used to initialize the weights and biases
         
-        self.epochs             = 0 # Number of iterations or training cycles, includes both the FeedFoward and Backpropogation
-        self.max_episode_steps  = 0 # Max number of trials before ending the experiment
+        self.epochs             = 0 # Number of failed trials allowed before simulation stops
+        self.max_episode_steps  = 0 # Number of time steps required to declare a trial as successful
 
         # Model Weights
         self.actor_w1           = []
@@ -403,6 +408,7 @@ class ActorCriticClass:
         
                 # Update the critic network
                 Ec = critic_cost(self.alpha, J, Jlast, r)
+                self.latest_criticcost.append(Ec)
                 numUpdates = 0
                 while Ec > self.critic_err_thresh and numUpdates<self.critic_cycle:
                     # Update the weights then calculate the error again
@@ -443,7 +449,6 @@ class ActorCriticClass:
                 if self.critic_lrate < self.critic_learn_decay: self.critic_lrate = self.critic_learn_decay
 
                 # Save history
-                self.latest_criticcost.append(Ec)
                 angle_hist.append(angle)
                 vel_hist.append(X[0,3])
                 j_hist.append(J[0,0])

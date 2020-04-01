@@ -220,9 +220,9 @@ def setupTab1(gui):
     gui.addLabel("l3e", "Minimum Learn Rate", row, 0);      gui.addNumericEntry("actorMinLearn", row, 1);
     gui.addLabel("l3f", "Train Err Threshold", row, 2);     gui.addNumericEntry("actorErrThreshold", row, 3);       row=row+1
     gui.setEntry("actorWidth", "24")
-    gui.setEntry("actorCycle", "100")
-    gui.setEntry("actorlearningrate", "0.3")
-    gui.setEntry("actorLearnDecay", "0.05")
+    gui.setEntry("actorCycle", "10")
+    gui.setEntry("actorlearningrate", "0.01")
+    gui.setEntry("actorLearnDecay", "0.001")
     gui.setEntry("actorMinLearn", "0.005")
     gui.setEntry("actorErrThreshold", "0.005")
     gui.stopLabelFrame()
@@ -236,8 +236,8 @@ def setupTab1(gui):
     gui.addLabel("l4f", "Train Err Threshold", row, 2);     gui.addNumericEntry("criticErrThreshold", row, 3);      row=row+1
     gui.addLabel("l4g", "Cost Horizon", row, 0);            gui.addNumericEntry("alpha", row, 1);                   row=row+1
     gui.setEntry("criticWidth", "24")
-    gui.setEntry("criticCycle", "50")
-    gui.setEntry("criticlearningrate", "0.3")
+    gui.setEntry("criticCycle", "5")
+    gui.setEntry("criticlearningrate", "0.01")
     gui.setEntry("criticLearnDecay", "0.05")
     gui.setEntry("criticMinLearn", "0.005")
     gui.setEntry("criticErrThreshold", "0.05")
@@ -245,8 +245,8 @@ def setupTab1(gui):
     gui.stopLabelFrame()
 
     gui.startLabelFrame("NN Weights Initialization - Uniform Distribution")
-    gui.addLabel("l5a", "Lower Limit", row, 0);            gui.addNumericEntry("lowlimit", row, 1)
-    gui.addLabel("l5b", "Upper Limit", row, 2);         gui.addNumericEntry("highlimit", row, 3);                   row=row+1
+    gui.addLabel("l5a", "Lower Limit", row, 0);             gui.addNumericEntry("lowlimit", row, 1)
+    gui.addLabel("l5b", "Upper Limit", row, 2);             gui.addNumericEntry("highlimit", row, 3);               row=row+1
     gui.setEntry("lowlimit", "-1.0")
     gui.setEntry("highlimit", "1.0")
     gui.stopLabelFrame()
@@ -368,7 +368,7 @@ app.setLabelBg("l1", "green")
 
 app.addButtons(["Apply Hyperparameters and Initialize"], trainInit)
 app.addButtons(["Train: Step-by-Step"], trainStep)
-app.addButtons(["Train: All Epochs"], trainAll)
+app.addButtons(["Train: All Trials"], trainAll)
 app.addMessage("message", mess1)
 app.setMessageWidth("message", 550)
 
